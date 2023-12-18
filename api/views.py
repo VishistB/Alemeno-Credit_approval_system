@@ -6,6 +6,17 @@ from .models import CustomerModel,LoanModel
 from .serializers import CustomerSerializer
 from scripts.eligibile import creditScore,calculate_monthly_installment
 from scripts.repayments import calculate_repayments_left
+from .tasks import process_loan_eligibility
+
+@api_view(['GET'])
+def getEndpoints(request):
+    routes = {
+        'register': '/register/',
+        'check-eligibility': '/check-eligibility/',
+        'view-loan-details': '/view-loan/<int:loan_id>/',
+        'view-loans-by-customer': '/view-loans/<int:customer_id>/',
+    }
+    return Response(routes)
 
 @api_view(['POST'])
 def register(request):
@@ -130,3 +141,24 @@ def view_loans_by_customer(request, customer_id):
         })
 
     return Response(loan_data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def create_loan(request):
+    if request.method == 'POST':
+        data = request.data
+        customer_id = data['customer_id']
+        loan_amount = data['loan_amount']
+        interest_rate = data['interest_rate']
+        tenure = data['tenure']
+
+        process_loan_eligibility.delay(customer_id, loan_amount, interest_rate, tenure)
+
+        response_data = {
+            'loan_id': None,
+            'customer_id': customer_id,
+            'loan_approved': False,
+            'message': "Loan processing in the background",
+            'monthly_installment': 0,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)

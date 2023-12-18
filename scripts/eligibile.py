@@ -1,5 +1,6 @@
 def creditScore(customer):
-    # this might require heavy modification
+    # Based on various methods this can be modified
+    # I added a placeholder formula just for the sake of it.
     debt=customer.current_debt
     allowed=customer.approved_limit
     cScore=round(debt/allowed)*100
