@@ -11,8 +11,8 @@ class CustomerModel(models.Model):
 
 class LoanModel(models.Model):
     # customer = models.ForeignKey(CustomerModel, on_delete=models.CASCADE)
-    customer_id = models.CharField(max_length=20, unique=True)
-    loan_id = models.CharField(max_length=20,unique=True)
+    customer_id = models.CharField(max_length=20)
+    loan_id = models.CharField(max_length=20)
     loan_amount = models.IntegerField()
     tenure = models.IntegerField()
     interest_rate = models.IntegerField()
@@ -20,3 +20,6 @@ class LoanModel(models.Model):
     emis_paid_on_time = models.IntegerField(default=0)
     start_date = models.DateField()
     end_date = models.DateField()
+
+    class Meta:
+        unique_together = ('customer_id', 'loan_id')

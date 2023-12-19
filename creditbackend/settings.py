@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import os
 
 from pathlib import Path
 
@@ -75,12 +76,15 @@ WSGI_APPLICATION = "creditbackend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# 'NAME': os.environ.get('POSTGRES_DB', 'default_database_name'),
+# 'USER': os.environ.get('POSTGRES_USER', 'default_database_user'),
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "chodmsxf",
-        "USER":"chodmsxf",
-        "PASSWORD":"cuGQTj5hmkQKoaUrR2mLZKhUlESTWUwV",
+        'NAME': 'chodmsxf',
+        'USER': 'chodmsxf',
+        "PASSWORD":'cuGQTj5hmkQKoaUrR2mLZKhUlESTWUwV',
         "HOST":"cornelius.db.elephantsql.com",
         "PORT":"5432",
     }
@@ -122,5 +126,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER ='json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

@@ -1,6 +1,6 @@
 from celery import shared_task
 from .models import CustomerModel, LoanModel
-from scripts import creditScore, calculate_monthly_installment
+from .scripts.eligibile import creditScore, calculate_monthly_installment
 
 @shared_task
 

@@ -1,0 +1,23 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: chodmsxf
+      POSTGRES_USER: chodmsxf
+      POSTGRES_PASSWORD: cuGQTj5hmkQKoaUrR2mLZKhUlESTWUwV
+  redis:
+    image: "redis:latest"
+  celery-worker:
+    build: .
+    command: celery -A creditbackend worker -l info
+    depends_on:
+      - db
+      - redis

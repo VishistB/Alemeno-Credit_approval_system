@@ -4,8 +4,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import CustomerModel,LoanModel
 from .serializers import CustomerSerializer
-from scripts.eligibile import creditScore,calculate_monthly_installment
-from scripts.repayments import calculate_repayments_left
+from api.scripts.eligibile import creditScore,calculate_monthly_installment
+from api.scripts.repayments import calculate_repayments_left
 from .tasks import process_loan_eligibility
 
 @api_view(['GET'])
@@ -15,6 +15,7 @@ def getEndpoints(request):
         'check-eligibility': '/check-eligibility/',
         'view-loan-details': '/view-loan/<int:loan_id>/',
         'view-loans-by-customer': '/view-loans/<int:customer_id>/',
+        'create-loans':'create-loan/',
     }
     return Response(routes)
 
@@ -102,19 +103,16 @@ def check_eligibility(request):
 @api_view(['GET'])
 def view_loan_details(request, loan_id):
     try:
-        loan = LoanModel.objects.get(id=loan_id)
+        loan = LoanModel.objects.get(loan_id=loan_id)
     except LoanModel.DoesNotExist:
-        return Response({'error': 'Loan not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    customer = loan.customer
-    customer_data = CustomerSerializer(customer).data
+        return Response({'error': 'Loan info not in database'}, status=status.HTTP_404_NOT_FOUND)
 
     response_data = {
-        'loan_id': loan.id,
-        'customer': customer_data,
-        'loan_approved': loan.approved,
+        'loan_id': loan.loan_id,
+        'amount':loan.loan_amount,
+        'customer': loan.customer_id,
         'interest_rate': loan.interest_rate,
-        'monthly_installment': loan.monthly_installment,
+        'monthly_installment': loan.monthly_repayment,
         'tenure': loan.tenure,
     }
 
