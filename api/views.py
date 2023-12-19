@@ -23,7 +23,7 @@ def getEndpoints(request):
 def register(request):
     if request.method=='POST':
         data=request.data
-        monthly_salary=data['monthly_income']
+        monthly_salary=int(data['monthly_income'])
 
         approved_limit=round(36*monthly_salary/100000)*100000
         customer_data= {

@@ -20,18 +20,20 @@ def import_customers_from_excel(file_path):
     df = pd.read_excel(file_path)
 
     for _, row in df.iterrows():
-        customer_id = str(row['Customer ID'])
-        first_name = row['First Name']
-        last_name = row['Last Name']
-        phone_number = str(row['Phone Number'])
-        monthly_salary = int(row['Monthly Salary'])
-        approved_limit = int(row['Approved Limit'])
-        current_debt = calculate_current_debt(customer_id)
+        customer_id=str(row['Customer ID'])
+        first_name= row['First Name']
+        last_name= row['Last Name']
+        age= row['Age']
+        phone_number= str(row['Phone Number'])
+        monthly_salary= int(row['Monthly Salary'])
+        approved_limit= int(row['Approved Limit'])
+        current_debt= calculate_current_debt(customer_id)
 
         CustomerModel.objects.create(
             customer_id=customer_id,
             first_name=first_name,
             last_name=last_name,
+            age=age,
             phone_number=phone_number,
             monthly_salary=monthly_salary,
             approved_limit=approved_limit,
