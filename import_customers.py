@@ -2,15 +2,17 @@ import pandas as pd
 import os
 import django
 from django.db import transaction
-from api.models import CustomerModel, LoanModel
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'creditbackend.settings')
 django.setup()
 
+from api.models import CustomerModel, LoanModel
+
 def calculate_current_debt(customer_id):
     loans = LoanModel.objects.filter(customer_id=customer_id)
+    total_debt=0
     for loan in loans:
-        total_debt = sum((loan.tenure - loan.emis_paid_on_time) * loan.monthly_repayment)
+        total_debt += (loan.tenure - loan.emis_paid_on_time) * loan.monthly_repayment
     return total_debt
 
 @transaction.atomic

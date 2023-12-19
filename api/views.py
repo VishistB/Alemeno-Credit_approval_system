@@ -103,18 +103,31 @@ def check_eligibility(request):
 @api_view(['GET'])
 def view_loan_details(request, loan_id):
     try:
-        loan = LoanModel.objects.get(loan_id=loan_id)
+        loans = LoanModel.objects.filter(loan_id=loan_id)
     except LoanModel.DoesNotExist:
         return Response({'error': 'Loan info not in database'}, status=status.HTTP_404_NOT_FOUND)
 
-    response_data = {
-        'loan_id': loan.loan_id,
-        'amount':loan.loan_amount,
-        'customer': loan.customer_id,
-        'interest_rate': loan.interest_rate,
-        'monthly_installment': loan.monthly_repayment,
-        'tenure': loan.tenure,
-    }
+    response_data = []
+
+    for loan in loans:
+        try:
+            customer = CustomerModel.objects.get(customer_id=loan.customer_id)
+            customer_name = f"{customer.first_name} {customer.last_name}"
+
+            loan_data = {
+                'loan_id': loan.loan_id,
+                'amount': loan.loan_amount,
+                'customer': customer_name,
+                'interest_rate': loan.interest_rate,
+                'monthly_installment': loan.monthly_repayment,
+                'tenure': loan.tenure,
+            }
+
+            response_data.append(loan_data)
+
+        except CustomerModel.DoesNotExist:
+            # Handle the case where customer info is not in the database
+            response_data.append({'error': f'Customer info not found for loan_id {loan_id}'})
 
     return Response(response_data, status=status.HTTP_200_OK)
 
@@ -125,16 +138,16 @@ def view_loans_by_customer(request, customer_id):
     except CustomerModel.DoesNotExist:
         return Response({'error': 'Customer not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    loans = LoanModel.objects.filter(customer=customer)
+    loans = LoanModel.objects.filter(customer_id=customer.customer_id)
     loan_data = []
 
     for loan in loans:
-        repayments_left = calculate_repayments_left(loan.tenure, loan.paid_installments)
+        repayments_left = calculate_repayments_left(loan.tenure, loan.emis_paid_on_time)
         loan_data.append({
-            'loan_id': loan.id,
-            'loan_approved': loan.approved,
+            'loan_id': loan.loan_id,
+            'loan_amount': loan.loan_amount,
             'interest_rate': loan.interest_rate,
-            'monthly_installment': loan.monthly_installment,
+            'monthly_installment': loan.monthly_repayment,
             'repayments_left': repayments_left,
         })
 
