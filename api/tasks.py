@@ -3,7 +3,6 @@ from .models import CustomerModel, LoanModel
 from .scripts.eligibile import creditScore, calculate_monthly_installment
 
 @shared_task
-
 def process_loan_eligibility(customer_id, loan_amount, interest_rate, tenure):
     try:
         customer = CustomerModel.objects.get(customer_id=customer_id)

@@ -8,7 +8,10 @@ class CustomerModel(models.Model):
     phone_number = models.CharField(max_length=15)
     monthly_salary = models.IntegerField()
     approved_limit = models.IntegerField()
-    current_debt = models.IntegerField()
+    current_debt = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-customer_id']
 
 class LoanModel(models.Model):
     # customer = models.ForeignKey(CustomerModel, on_delete=models.CASCADE)

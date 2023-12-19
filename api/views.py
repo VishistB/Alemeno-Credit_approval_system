@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import CustomerModel,LoanModel
 from .serializers import CustomerSerializer
+from django.db.models import Max
 from api.scripts.eligibile import creditScore,calculate_monthly_installment
 from api.scripts.repayments import calculate_repayments_left
 from .tasks import process_loan_eligibility
@@ -21,36 +22,47 @@ def getEndpoints(request):
 
 @api_view(['POST'])
 def register(request):
-    if request.method=='POST':
-        data=request.data
-        monthly_salary=int(data['monthly_income'])
+    if request.method == 'POST':
+        data = request.data
+        monthly_salary = int(data['monthly_salary'])
 
-        approved_limit=round(36*monthly_salary/100000)*100000
-        customer_data= {
+        try:
+            latest_customer = CustomerModel.objects.latest('id')
+            last_customer_id = latest_customer.customer_id
+            next_customer_id = str(int(last_customer_id) + 1)
+        except CustomerModel.DoesNotExist:
+            next_customer_id = '1'
+
+        print(next_customer_id)
+
+        approved_limit = round(36 * monthly_salary / 100000) * 100000
+        customer_data = {
+            'customer_id': next_customer_id,
             'first_name': data['first_name'],
             'last_name': data['last_name'],
             'age': data['age'],
-            'monthly_income': monthly_salary,
+            'monthly_salary': monthly_salary,
             'approved_limit': approved_limit,
             'phone_number': data['phone_number'],
+            'current_debt': 0,
         }
 
-        serializer=CustomerSerializer(data=customer_data)
+        serializer = CustomerSerializer(data=customer_data)
         if serializer.is_valid():
             serializer.save()
 
-            response_data= {
+            response_data = {
                 'customer_id': serializer.data['customer_id'],
                 'name': f"{serializer.data['first_name']} {serializer.data['last_name']}",
                 'age': serializer.data['age'],
-                'monthly_income': serializer.data['monthly_income'],
+                'monthly_salary': serializer.data['monthly_salary'],
                 'approved_limit': serializer.data['approved_limit'],
                 'phone_number': serializer.data['phone_number'],
+                'current_debt': serializer.data['current_debt'],
             }
-            return Response(response_data,status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def check_eligibility(request):
